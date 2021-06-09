@@ -110,6 +110,7 @@ def repo_file(repo, *path, mkdir=False):
     if repo_dir(repo, *path[:-1], mkdir=mkdir):
         return repo_path(repo, *path)
 
+
 def repo_dir(repo, *path, mkdir=False):
     """Same as repo_path, but mkdir *path if absent if mkdir."""
     path = repo_path(repo, *path)
@@ -126,3 +127,38 @@ def repo_dir(repo, *path, mkdir=False):
 
     else:
         return None
+
+
+def repo_create(path):
+    """ Create a new repository at path . """
+    repo = GitRepository(path, True)
+
+    # make sure the path doesn't already exist and not empty
+
+    if os.path.exists(repo.worktree):
+        if not os.path.isdir(repo.worktree):
+            raise Exception("%s is not a directory" % path)
+        if os.listdir(repo.worktree):
+            raise Exception("%s is not empty" % path)
+    else:
+        os.makedirs(repo.work)
+
+    assert(repo_dir(repo, "branches", mkdir=True))
+    assert(repo_dir(repo, "objects", mkdir=True))
+    assert(repo_dir(repo, "refs", "tags", mkdir=True))
+    assert(repo_dir(repo, "refs", "heads", mkdir=True))
+
+
+    # .git/description
+    with open(repo_file(repo, "description"),"W") as f:
+        f.write("Unnamed repository; edit this file 'description' to name the repository.\n")
+
+    # .git/Head
+    with open(repo_file, "HEAD") as f:
+        f.write("ref: refs/heads/master\n")
+
+    with open(repo_file(repo, "config"), "w") as f:
+        config = repo_default_config()
+        config.write(f)
+
+    return repo
