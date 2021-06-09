@@ -148,10 +148,10 @@ def repo_create(path):
     assert(repo_dir(repo, "refs", "tags", mkdir=True))
     assert(repo_dir(repo, "refs", "heads", mkdir=True))
 
-
     # .git/description
-    with open(repo_file(repo, "description"),"W") as f:
-        f.write("Unnamed repository; edit this file 'description' to name the repository.\n")
+    with open(repo_file(repo, "description"), "W") as f:
+        f.write(
+            "Unnamed repository; edit this file 'description' to name the repository.\n")
 
     # .git/Head
     with open(repo_file, "HEAD") as f:
@@ -162,3 +162,24 @@ def repo_create(path):
         config.write(f)
 
     return repo
+
+
+def repo_default_config():
+    ret = configparser.ConfigParser()
+
+    ret.add_section("core")
+    ret.set("core", "repositoryformatversion", "0")
+    ret.set("core", "filemode", "false")
+    ret.set("core", "bare", "false")
+
+    return ret
+
+
+argsp = argsubparsers.add_parser(
+    "init", help="Initialize a new , empty repository")
+argsp.add_argument("path", metavar="directory", nargs="?",
+                   default=".", help="Where to create the repository . ")
+
+
+def cmd_init(args):
+    repo_create(args.path)
